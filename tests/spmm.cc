@@ -118,9 +118,8 @@ int main(int argc, char** argv) {
   // csr
   double dur1 = RunMinigun(scsr, csr, gdata, truth);
   double dur2 = RunMKL(scsr, gdata, truth);
-  std::cout << N << "," << M << "," << feat_size << "," << dur1 << ","
-    << dur2 << "\n";
-
+  std::cout << "# Nodes: " << N << ", # Edges: " << M << ", Feature Size: " << feat_size << std::endl;
+  std::cout << "Minigun: " << dur1 << " (ms), MKL: " << dur2 << " (ms)\n";
   FreeGData(&gdata, &truth);
   return 0;
 }
