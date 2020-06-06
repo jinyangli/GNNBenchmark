@@ -1,6 +1,9 @@
 Benchmark AMD CPU/GPU performance with GNN workload
 ===============================
-Below are steps to run the benchmark
+This repository is for benchmarking sparse and dense kernel performance on AMD
+CPU and GPU with Graph Neural Network (GNN) workload. For now, only CPU tests
+are available here.
+
 
 Setup the environment
 ---------------------
@@ -10,9 +13,9 @@ Many packages need to be installed to build the tests and generate input for
 the tests including build-essential, make, cmake, python3
 and python packages like numpy, scipy, torch, dgl.
 
-The list above is incomplete. We provide a DockerFile (in docker folder) to
-build a container with all required dependencies and we recommend you use it.
-Checkout how to build the container and run it in docker/README.md
+The list above is incomplete. We provide a DockerFile to build a container with
+all required dependencies and we recommend you use it. Check out how to build
+the container and run it in [docker](./docker).
 
 ### Install MKL
 Download and install MKL for C/C++. This benchmark repository was tested with MKL\_2020.1.217
@@ -25,7 +28,14 @@ export LIBRARY_PATH=$LIBRARY_PATH:$MKLROOT/lib/intel64
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$MKLROOT/lib/intel64
 ```
 
-Build tests
+When doing tested on AMD CPU, run the following command to improve MKL
+performance as suggested in [this
+post](https://www.pugetsystems.com/labs/hpc/How-To-Use-MKL-with-AMD-Ryzen-and-Threadripper-CPU-s-Effectively-for-Python-Numpy-And-Other-Applications-1637/)
+```bash
+export MKL_DEBUG_CPU_TYPE=5
+```
+
+Build and run tests
 -----------
 ### Setup this repository
 
@@ -43,7 +53,7 @@ cmake ..
 make -j$(nproc)
 ```
 
-### Generate input graph (Reddit dataset)
+### Generate input graph
 ```bash
 cd /path/to/this/repository
 cd scripts
@@ -61,7 +71,7 @@ support](https://docs.dgl.ai/api/python/data.html#dataset-classes) for a large
 set of datasets. Check out the list
 [here](https://docs.dgl.ai/en/latest/features/dataset.html)
 
-### Run
+### Run tests
 ```bash
 cd /path/to/this/repository
 ```
@@ -70,6 +80,11 @@ two arguments: input graph file and node feature size. The test code will
 convert the input graph to a sparse matrix (A) in CSR format and creates a randomly
 initialized node feature tensor (H) of size (num\_nodes, node\_feature\_size), and then
 perform Sparse Matrix Multiplication (SPMM) between A and H and measure execution time.
+
+If we are testing on AMD CPU, run the following:
+```bash
+export MKL_DEBUG_CPU_TYPE=5
+```
 
 Now, run the test:
 ```bash

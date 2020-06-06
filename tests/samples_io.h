@@ -1,5 +1,5 @@
-#ifndef SAMPLES_SAMPLES_IO_H_
-#define SAMPLES_SAMPLES_IO_H_
+#ifndef SAMPLES_IO_H_
+#define SAMPLES_IO_H_
 
 #include <dmlc/io.h>
 #include <dmlc/serializer.h>

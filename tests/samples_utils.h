@@ -1,5 +1,5 @@
-#ifndef SAMPLES_SAMPLES_UTILS_H_
-#define SAMPLES_SAMPLES_UTILS_H_
+#ifndef SAMPLES_UTILS_H_
+#define SAMPLES_UTILS_H_
 
 #include <vector>
 #include <map>
