@@ -91,5 +91,20 @@ Now, run the test:
 ./build/tests/cpu_spmm scripts/bench-graphs/reddit.grh 16
 ```
 
-The testing code will check result correctness, warm up by executing the SPMM 10 times,
-and then test 10 times and report average execution time in milliseconds.
+The testing code will check result correctness, warm up by executing the SPMM
+10 times, and then test 10 times and report average execution time in
+milliseconds.
+
+
+Additional Tests
+-----------------
+### Dense matrix multiplication
+`scripts/bench_dense_mm.py` benchmarks the performance of multiplication
+between two dense matrix of size 1000 by 1000 using pytorch. To run this test,
+on Intel Machine, one needs to install torch. And on AMD machine, use this
+AMD-maintained [fork of
+PyTorch](https://github.com/ROCmSoftwarePlatform/pytorch) which uses BLIS as
+BLAS library.
+
+Alternatively, one should use C++ interface of MKL and BLIS to compare their
+performance.
