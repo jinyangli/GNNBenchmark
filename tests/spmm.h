@@ -37,11 +37,10 @@ void InitGData(const utils::SampleCsr& csr, GData* gdata, GData* truth) {
   const int D = gdata->D;
   std::vector<float> ndata(N * gdata->D), weight(M, 0.);
   for (size_t i = 0; i < ndata.size(); ++i) {
-    ndata[i] = (float)rand() / RAND_MAX;
+    ndata[i] = (float)rand() / RAND_MAX + 0.5;
   }
   for (size_t i = 0; i < weight.size(); ++i) {
-    // XXX: weight has to be the same across edges because transpose function did not change weights
-    weight[i] = 3.45;
+    weight[i] = (float)rand() / RAND_MAX + 0.5;
   }
   gdata->ndata = new float[N * D];
   gdata->weight = new float[M];
@@ -49,7 +48,7 @@ void InitGData(const utils::SampleCsr& csr, GData* gdata, GData* truth) {
   memcpy(gdata->ndata, &ndata[0], N * D * sizeof(float));
   memcpy(gdata->weight, &weight[0], M * sizeof(float));
 
-  // compute truth
+  // compute truth for A^t*H
   truth->out = new float[N * D];
   std::fill(truth->out, truth->out + N * D, 0.);
   for (size_t u = 0; u < csr.row_offsets.size() - 1; u++) {
@@ -71,16 +70,17 @@ void CheckResult(const utils::SampleCsr& csr, GData* gdata, GData* truth) {
   const int32_t N = csr.row_offsets.size() - 1;
   const int D = gdata->D;
   bool equal = utils::IterEqual(gdata->out, truth->out, N * D);
+  /*
   if (!equal) {
     for (int i = 0; i < N * D; ++i) {
       if (!FCLOSE(gdata->out[i], truth->out[i])) {
         std::cout << i << ": " << gdata->out[i] << " " << truth->out[i] << "\n";
       }    }
   }
+  */
   assert(equal);
-  //std::cout << "Correct? " << equal << std::endl;
 }
 
-}  // masked_mm
+}  // spmm
 
 #endif

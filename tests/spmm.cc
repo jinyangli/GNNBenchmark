@@ -20,7 +20,7 @@ double RunMinigun(const utils::SampleCsr& scsr,
 
   minigun::IntArray infront;
 
-  // check accuracy
+  // check correctness
   typedef minigun::advance::Config<true, minigun::advance::kV2N> Config;
   minigun::advance::Advance<kDLCPU, int32_t, Config, GData, SPMMFunctor>(
       rtcfg, csr, &gdata, infront);
@@ -35,6 +35,7 @@ double RunMinigun(const utils::SampleCsr& scsr,
         rtcfg, csr, &gdata, infront);
   }
 
+  // run test
   clock_gettime(CLOCK_REALTIME, &start);
   for (int i = 0; i < K; ++i) {
     minigun::advance::Advance<kDLCPU, int32_t, Config, GData, SPMMFunctor>(
@@ -50,8 +51,6 @@ double RunMinigun(const utils::SampleCsr& scsr,
 double RunMKL(utils::SampleCsr& scsr,
     GData& gdata,
     GData& truth) {
-  // create stream
-
   const int32_t N = scsr.row_offsets.size() - 1;
   sparse_matrix_t A;
   sparse_status_t status;
@@ -59,9 +58,17 @@ double RunMKL(utils::SampleCsr& scsr,
       &scsr.row_offsets[0], &scsr.row_offsets[1], &scsr.column_indices[0],
       gdata.weight);
   assert(status == SPARSE_STATUS_SUCCESS);
+  sparse_matrix_t At;
+
+  // Minigun actually computes A^t * H, so to match the results, we need to
+  // transpose A here
+  status = mkl_sparse_convert_csr(A, SPARSE_OPERATION_TRANSPOSE, &At);
+  assert(status == SPARSE_STATUS_SUCCESS);
+
+  // check correctness
   struct matrix_descr descr;
   descr.type = SPARSE_MATRIX_TYPE_GENERAL;
-  status = mkl_sparse_s_mm(SPARSE_OPERATION_NON_TRANSPOSE, 1.0, A, descr,
+  status = mkl_sparse_s_mm(SPARSE_OPERATION_NON_TRANSPOSE, 1.0, At, descr,
       SPARSE_LAYOUT_ROW_MAJOR, gdata.ndata, gdata.D, gdata.D, 0,
       gdata.out, gdata.D);
   assert(status == SPARSE_STATUS_SUCCESS);
@@ -72,15 +79,16 @@ double RunMKL(utils::SampleCsr& scsr,
   // warm up
   const int K = 10;
   for (int i = 0; i < K; ++i) {
-    status = mkl_sparse_s_mm(SPARSE_OPERATION_NON_TRANSPOSE, 1.0, A, descr,
+    status = mkl_sparse_s_mm(SPARSE_OPERATION_NON_TRANSPOSE, 1.0, At, descr,
         SPARSE_LAYOUT_ROW_MAJOR, gdata.ndata, gdata.D, gdata.D, 0,
         gdata.out, gdata.D);
     assert(status == SPARSE_STATUS_SUCCESS);
   }
 
+  // run test
   clock_gettime(CLOCK_REALTIME, &start);
   for (int i = 0; i < K; ++i) {
-    status = mkl_sparse_s_mm(SPARSE_OPERATION_NON_TRANSPOSE, 1.0, A, descr,
+    status = mkl_sparse_s_mm(SPARSE_OPERATION_NON_TRANSPOSE, 1.0, At, descr,
         SPARSE_LAYOUT_ROW_MAJOR, gdata.ndata, gdata.D, gdata.D, 0,
         gdata.out, gdata.D);
     assert(status == SPARSE_STATUS_SUCCESS);
@@ -93,7 +101,6 @@ double RunMKL(utils::SampleCsr& scsr,
 }
 
 int main(int argc, char** argv) {
-  // test transpose
   srand(42);
   if (argc < 3) {
     std::cout << "USAGE: ./bench_spmm <file_name> <feat_size>" << std::endl;
