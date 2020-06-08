@@ -126,15 +126,15 @@ Additional Tests
 [scripts/bench\_dense\_mm.py](./scripts/bench_dense_mm.py) benchmarks the
 performance of multiplication between two dense matrix of size 1000 by 1000
 using pytorch. To run this test, on Intel Machine, one needs to install torch.
-And on AMD machine, use this docker file from an AMD-maintained [fork of
-PyTorch](https://github.com/ROCmSoftwarePlatform/pytorch/blob/master/docker/pytorch/cpu-only/Dockerfile)
-which uses BLIS as BLAS library.
+And on AMD machine, use [this docker file]
+(https://github.com/ROCmSoftwarePlatform/pytorch/blob/master/docker/pytorch/cpu-only/Dockerfile)
+from an AMD-maintained fork of PyTorch which uses BLIS as BLAS library.
 
 We tested on p3.8xlarge (Intel CPU) and m5a.8xlarge (AMD CPU) instances on AWS.
 For single precision matrix multiplication between two square matrices of size
-1000x1000, Intel CPU takes 2.1-3.8ms, and AMD CPU takes about 4.7ms. We suspect
-that the large variance of Intel CPU is due to automatic CPU clock rate
-adjustment.
+1000x1000, on Intel CPU MKL takes 2.1-3.8ms, and AMD CPU BLIS takes about
+4.7ms. We suspect that the large variance of Intel CPU is due to automatic CPU
+clock rate adjustment.
 
 Alternatively, one should use C++ interface of MKL and BLIS to compare their
 performance.
