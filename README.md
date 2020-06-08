@@ -95,16 +95,46 @@ The testing code will check result correctness, warm up by executing the SPMM
 10 times, and then test 10 times and report average execution time in
 milliseconds.
 
+### Results
+The table below shows the results we got on Reddit Graph (232965 nodes,
+114848857 edges) following the above steps using AWS machines. For Intel CPU we
+used p3.8xlarge instance, and for AMD CPU we used m5a.8xlarge. Both have 32
+virtual cores.
+
+For Minigun SPMM kernel, the execution time in milliseconds:
+
+| Feature Size | AMD      | Intel    |
+|--------------|----------|----------|
+| 16           | 1839.530 | 1324.340 |
+| 32           | 2985.770 | 2380.760 |
+| 64           | 4837.950 | 4560.380 |
+| 128          | 9550.330 | 8952.170 |
+
+For MKL SPMM kernel, the execution time in milliseconds:
+
+| Feature Size | AMD      | Intel   |
+|--------------|----------|---------|
+| 16           | 277.550  | 114.241 |
+| 32           | 552.329  | 101.318 |
+| 64           | 1051.990 | 196.756 |
+| 128          | 1958.280 | 670.561 |
+
 
 Additional Tests
 -----------------
 ### Dense matrix multiplication
-`scripts/bench_dense_mm.py` benchmarks the performance of multiplication
-between two dense matrix of size 1000 by 1000 using pytorch. To run this test,
-on Intel Machine, one needs to install torch. And on AMD machine, use this
-AMD-maintained [fork of
-PyTorch](https://github.com/ROCmSoftwarePlatform/pytorch) which uses BLIS as
-BLAS library.
+[scripts/bench\_dense\_mm.py](./scripts/bench_dense_mm.py) benchmarks the
+performance of multiplication between two dense matrix of size 1000 by 1000
+using pytorch. To run this test, on Intel Machine, one needs to install torch.
+And on AMD machine, use this docker file from an AMD-maintained [fork of
+PyTorch](https://github.com/ROCmSoftwarePlatform/pytorch/blob/master/docker/pytorch/cpu-only/Dockerfile)
+which uses BLIS as BLAS library.
+
+We tested on p3.8xlarge (Intel CPU) and m5a.8xlarge (AMD CPU) instances on AWS.
+For single precision matrix multiplication between two square matrices of size
+1000x1000, Intel CPU takes 2.1-3.8ms, and AMD CPU takes about 4.7ms. We suspect
+that the large variance of Intel CPU is due to automatic CPU clock rate
+adjustment.
 
 Alternatively, one should use C++ interface of MKL and BLIS to compare their
 performance.
