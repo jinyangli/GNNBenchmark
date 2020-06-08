@@ -126,8 +126,8 @@ Additional Tests
 [scripts/bench\_dense\_mm.py](./scripts/bench_dense_mm.py) benchmarks the
 performance of multiplication between two dense matrix of size 1000 by 1000
 using pytorch. To run this test, on Intel Machine, one needs to install torch.
-And on AMD machine, use [this docker file]
-(https://github.com/ROCmSoftwarePlatform/pytorch/blob/master/docker/pytorch/cpu-only/Dockerfile)
+And on AMD machine, use [this docker
+file](https://github.com/ROCmSoftwarePlatform/pytorch/blob/master/docker/pytorch/cpu-only/Dockerfile)
 from an AMD-maintained fork of PyTorch which uses BLIS as BLAS library.
 
 We tested on p3.8xlarge (Intel CPU) and m5a.8xlarge (AMD CPU) instances on AWS.
