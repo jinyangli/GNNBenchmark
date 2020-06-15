@@ -1,3 +1,4 @@
 build
 bench-graphs
 __pycache__
+*.swp
