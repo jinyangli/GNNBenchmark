@@ -178,7 +178,7 @@ We tested using the same machines mentioned in sparse kernel experiments above.
 And results are shown below:
 
 |     | AMD   | Intel / NVIDIA | 
-|------------------------------|
+|-----|-------|----------------|
 | CPU | 4.7   | 2.1-3.8        |
 | GPU | 0.239 | 0.292          |
 
