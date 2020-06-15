@@ -102,7 +102,7 @@ virtual cores.
 For Minigun SPMM kernel, the execution time in milliseconds:
 
 | Feature Size | AMD      | Intel    |
-|--------------|----------|----------|
+|-------------:|---------:|---------:|
 | 16           | 1839.530 | 1324.340 |
 | 32           | 2985.770 | 2380.760 |
 | 64           | 4837.950 | 4560.380 |
@@ -111,7 +111,7 @@ For Minigun SPMM kernel, the execution time in milliseconds:
 For MKL SPMM kernel, the execution time in milliseconds:
 
 | Feature Size | AMD      | Intel   |
-|--------------|----------|---------|
+|-------------:|---------:|--------:|
 | 16           | 277.550  | 114.241 |
 | 32           | 552.329  | 101.318 |
 | 64           | 1051.990 | 196.756 |
@@ -143,7 +143,7 @@ execution time (in milliseconds) of 100 runs (after warming up with another 100
 runs). Below is the result using Reddit dataset as sparse graph:
 
 | Feature Size | AMD    | Intel   |
-|--------------|--------|---------|
+|-------------:|-------:|--------:|
 | 16           | 17.599 | 35.434  |
 | 32           | 24.150 | 42.041  |
 | 64           | 43.302 | 79.118  |
@@ -156,7 +156,7 @@ and output feature size 41 and different hidden layer size. The accuracy
 numbers show the mean and standard deviation of 10 runs.
 
 | Hidden Size | AMD epoch time | AMD accuracy        | NIVIDA epoch time | NVIDIA accuracy     |
-|-------------|----------------|---------------------|-------------------|---------------------|
+|------------:|---------------:|--------------------:|------------------:|--------------------:|
 | 16          | 0.0692         | 78.99 &plusmn; 3.43 | 0.1811            | 78.46 &plusmn; 5.31 |
 | 32          | 0.0762         | 90.21 &plusmn; 1.52 | 0.1886            | 88.42 &plusmn; 3.47 |
 | 64          | 0.0982         | 92.62 &plusmn; 0.27 | 0.2270            | 92.51 &plusmn; 0.59 |
@@ -179,7 +179,7 @@ We tested using the same machines mentioned in sparse kernel experiments above.
 Average execution time (in milliseconds) of 10 runs is shown below. 
 
 |     | AMD   | Intel / NVIDIA | 
-|-----|-------|----------------|
+|----:|------:|---------------:|
 | CPU | 4.7   | 2.1-3.8        |
 | GPU | 0.239 | 0.292          |
 
