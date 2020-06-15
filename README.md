@@ -101,6 +101,8 @@ virtual cores.
 
 For Minigun SPMM kernel, the execution time in milliseconds:
 
+<center>
+
 | Feature Size | AMD      | Intel    |
 |-------------:|---------:|---------:|
 | 16           | 1839.530 | 1324.340 |
@@ -108,7 +110,11 @@ For Minigun SPMM kernel, the execution time in milliseconds:
 | 64           | 4837.950 | 4560.380 |
 | 128          | 9550.330 | 8952.170 |
 
+</center>
+
 For MKL SPMM kernel, the execution time in milliseconds:
+
+<center>
 
 | Feature Size | AMD      | Intel   |
 |-------------:|---------:|--------:|
@@ -116,6 +122,8 @@ For MKL SPMM kernel, the execution time in milliseconds:
 | 32           | 552.329  | 101.318 |
 | 64           | 1051.990 | 196.756 |
 | 128          | 1958.280 | 670.561 |
+
+</center>
 
 
 GPU Sparse Performance Benchmark
@@ -142,6 +150,8 @@ are:
 execution time (in milliseconds) of 100 runs (after warming up with another 100
 runs). Below is the result using Reddit dataset as sparse graph:
 
+<center>
+
 | Feature Size | AMD    | Intel   |
 |-------------:|-------:|--------:|
 | 16           | 17.599 | 35.434  |
@@ -149,11 +159,15 @@ runs). Below is the result using Reddit dataset as sparse graph:
 | 64           | 43.302 | 79.118  |
 | 128          | 93.180 | 156.993 |
 
+</center>
+
 ### End to end training time of Graph Convolution Network
 [tests-gpu/gcn.py](./tests-gpu/gcn.py) benchmarks average epoch time (in
 seconds) of training 2-layer GCN on Reddit Dataset with input feature size 602
 and output feature size 41 and different hidden layer size. The accuracy
 numbers show the mean and standard deviation of 10 runs.
+
+<center>
 
 | Hidden Size | AMD epoch time | AMD accuracy        | NIVIDA epoch time | NVIDIA accuracy     |
 |------------:|---------------:|--------------------:|------------------:|--------------------:|
@@ -161,6 +175,8 @@ numbers show the mean and standard deviation of 10 runs.
 | 32          | 0.0762         | 90.21 &plusmn; 1.52 | 0.1886            | 88.42 &plusmn; 3.47 |
 | 64          | 0.0982         | 92.62 &plusmn; 0.27 | 0.2270            | 92.51 &plusmn; 0.59 |
 | 128         | 0.1520         | 93.24 &plusmn; 0.09 | 0.3078            | 93.24 &plusmn; 0.12 |
+
+</center>
 
 
 Additional Tests
@@ -178,10 +194,14 @@ image](https://rocmdocs.amd.com/en/latest/Deep_learning/Deep-learning.html#recom
 We tested using the same machines mentioned in sparse kernel experiments above.
 Average execution time (in milliseconds) of 10 runs is shown below. 
 
+<center>
+
 |     | AMD   | Intel / NVIDIA | 
 |----:|------:|---------------:|
 | CPU | 4.7   | 2.1-3.8        |
 | GPU | 0.239 | 0.292          |
+
+</center>
 
 We suspect that the large variance of Intel CPU is due to automatic CPU clock
 rate adjustment.
