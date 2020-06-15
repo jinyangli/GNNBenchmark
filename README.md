@@ -1,11 +1,9 @@
 Benchmark AMD CPU/GPU performance with GNN workload
 ===============================
 This repository is for benchmarking sparse and dense kernel performance on AMD
-CPU and GPU with Graph Neural Network (GNN) workload. For now, only CPU tests
-are available here.
+CPU and GPU with Graph Neural Network (GNN) workload. 
 
-
-Setup the environment
+CPU Sparse Performance Benchmark
 ---------------------
 
 ### Install system packages
@@ -35,16 +33,14 @@ post](https://www.pugetsystems.com/labs/hpc/How-To-Use-MKL-with-AMD-Ryzen-and-Th
 export MKL_DEBUG_CPU_TYPE=5
 ```
 
-Build and run tests
------------
-### Setup this repository
+### Build tests
 
 First, `git clone` this repository and change directory into it. Then initialize submodules with 
 ```bash
 git submodule update --init --recursive
 ```
 
-### Build
+Then, build the test by
 ```bash
 cd /path/to/this/repository
 mkdir build
@@ -118,6 +114,34 @@ For MKL SPMM kernel, the execution time in milliseconds:
 | 32           | 552.329  | 101.318 |
 | 64           | 1051.990 | 196.756 |
 | 128          | 1958.280 | 670.561 |
+
+
+GPU Sparse Performance Benchmark
+-------------------------
+Benchmark performance of Sparse Matrix Multiplication on AMD and NVIDIA GPU.
+For AMD, we used Vega 20 [Radeon VII] (single precision 13.44 TFLOPS, 16GB HBM2
+memory, Bandwidth 1,024 GB/s, Memory Bus 4096 bit), and for NVIDIA, we used
+GeForce RTX 2080 (single precision 10.07 TFLOPS, 8GB GDDR6 memory, Bandwidth
+448.0 GB/s, Memory Bus 256 bit)
+
+### Sparse Matrix Multiplication (SpMM) kernel
+
+Average execution time (in milliseconds) of 100 runs (after warming up with 100 runs)
+
+| Feature Size | AMD    | Intel   |
+|--------------|--------|---------|
+| 16           | 17.599 | 35.434  |
+| 32           | 24.150 | 42.041  |
+| 64           | 43.302 | 79.118  |
+| 128          | 93.180 | 156.993 |
+
+### End to end training time of Graph Convolution Network
+Epoch time of training 2-layer GCN on Reddit Dataset, with input feature size
+602 and output feature size 41.
+
+| Hidden Size | AMD    | Intel  |
+|-------------|--------|--------|
+| 128         | 0.1520 | 0.3079 |
 
 
 Additional Tests
