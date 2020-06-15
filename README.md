@@ -167,16 +167,23 @@ Additional Tests
 ### Dense matrix multiplication
 [scripts/bench\_dense\_mm.py](./scripts/bench_dense_mm.py) benchmarks the
 performance of multiplication between two dense matrix of size 1000 by 1000
-using pytorch. To run this test, on Intel Machine, one needs to install torch.
-And on AMD machine, use [this docker
+using pytorch. To run this test, on Intel CPU or NVIDIA GPU, one needs to
+install torch. On AMD machines, for CPU, use [this docker
 file](https://github.com/ROCmSoftwarePlatform/pytorch/blob/master/docker/pytorch/cpu-only/Dockerfile)
-from an AMD-maintained fork of PyTorch which uses BLIS as BLAS library.
+from an AMD-maintained fork of PyTorch which uses BLIS as BLAS library, and for
+GPU, use [this recommended docker
+image](https://rocmdocs.amd.com/en/latest/Deep_learning/Deep-learning.html#recommended-install-using-published-pytorch-rocm-docker-image).
 
-We tested on p3.8xlarge (Intel CPU) and m5a.8xlarge (AMD CPU) instances on AWS.
-For single precision matrix multiplication between two square matrices of size
-1000x1000, on Intel CPU MKL takes 2.1-3.8ms, and AMD CPU BLIS takes about
-4.7ms. We suspect that the large variance of Intel CPU is due to automatic CPU
-clock rate adjustment.
+We tested using the same machines mentioned in sparse kernel experiments above.
+And results are shown below:
 
-Alternatively, one should use C++ interface of MKL and BLIS to compare their
-performance.
+|     | AMD   | Intel / NVIDIA | 
+|------------------------------|
+| CPU | 4.7   | 2.1-3.8        |
+| GPU | 0.239 | 0.292          |
+
+We suspect that the large variance of Intel CPU is due to automatic CPU clock
+rate adjustment.
+
+Alternatively, one should use C++ interface of MKL, BLIS, cuSPARSE, and
+rocSPARSE to compare their performance.

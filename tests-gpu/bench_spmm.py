@@ -44,7 +44,7 @@ if __name__ == '__main__':
     parser.add_argument("--dataset", type=str, default="reddit-self-loop")
     parser.add_argument("--gpu", type=int, default=0)
     parser.add_argument("--n-hidden", type=int, default=128)
-    parser.add_argument("--n-repeat", type=int, default=10)
+    parser.add_argument("--n-repeat", type=int, default=100)
     args = parser.parse_args()
     print(args)
 
