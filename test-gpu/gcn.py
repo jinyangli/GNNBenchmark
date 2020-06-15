@@ -1,12 +1,10 @@
-import argparse, time
+import argparse
+import time
 import numpy as np
-import networkx as nx
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from dgl import DGLGraph
-import dgl.function as fn
-from dgl.data import RedditDataset 
+from dgl.data import load_data 
 
 class SPMM(torch.autograd.Function):
     @staticmethod
@@ -26,30 +24,31 @@ class GraphConv(nn.Module):
     def __init__(self,
                  in_feats,
                  out_feats,
-                 activation=None):
+                 activation=None,
+                 norm=None):
         super(GraphConv, self).__init__()
         self._in_feats = in_feats
         self._out_feats = out_feats
-        self._linear = nn.Linear(in_feats, out_feats)
+        self.weight = nn.Parameter(torch.Tensor(in_feats, out_feats))
+        self.bias = nn.Parameter(torch.Tensor(out_feats))
         self._activation = activation
+        self.norm = norm
         self.reset_parameters()
 
     def reset_parameters(self):
-        """Reinitialize learnable parameters."""
-        gain = nn.init.calculate_gain("relu")
-        nn.init.xavier_uniform_(self._linear.weight, gain=gain)
-        nn.init.zeros_(self._linear.bias)
+        nn.init.xavier_uniform_(self.weight)
+        nn.init.zeros_(self.bias)
 
     def forward(self, graph, feat):
-        if self._in_feats > self._out_feats:
-            # mult W first to reduce the feature size for aggregation.
-            rst = spmm(graph, self._linear(feat))
-        else:
-            # aggregate first then mult W
-            rst = self._linear(spmm(graph, feat))
+        if self.norm is not None:
+            feat = feat * self.norm[0]
+        feat = torch.matmul(feat, self.weight)
+        rst = spmm(graph, feat)
+        if self.norm is not None:
+            feat = feat * self.norm[1]
+        rst = rst + self.bias
         if self._activation is not None:
             rst = self._activation(rst)
-
         return rst
 
 class GCN(nn.Module):
@@ -59,16 +58,17 @@ class GCN(nn.Module):
                  n_classes,
                  n_layers,
                  activation,
-                 dropout):
+                 dropout,
+                 norm):
         super(GCN, self).__init__()
         self.layers = nn.ModuleList()
         # input layer
-        self.layers.append(GraphConv(in_feats, n_hidden, activation=activation))
+        self.layers.append(GraphConv(in_feats, n_hidden, activation=activation, norm=norm))
         # hidden layers
-        for i in range(n_layers - 2):
-            self.layers.append(GraphConv(n_hidden, n_hidden, activation=activation))
+        for _ in range(n_layers - 2):
+            self.layers.append(GraphConv(n_hidden, n_hidden, activation=activation, norm=norm))
         # output layer
-        self.layers.append(GraphConv(n_hidden, n_classes))
+        self.layers.append(GraphConv(n_hidden, n_classes, norm=norm))
         self.dropout = nn.Dropout(p=dropout)
 
     def forward(self, adjs, features):
@@ -90,24 +90,17 @@ def evaluate(model, adjs, features, labels, mask):
         return correct.item() * 1.0 / len(labels)
 
 def build_sparse_matrix(g, device):
-    # normalization
     n = g.number_of_nodes()
-    degs = g.in_degrees().float()
-    norm = torch.pow(degs, -0.5)
-    norm[torch.isinf(norm)] = 0
-    g.ndata["norm"] = norm
-    g.apply_edges(fn.u_mul_v("norm", "norm", "weight"))
-    weight = g.edata.pop("weight")
     src, dst = g.all_edges()
-    adj = torch.sparse.FloatTensor(torch.stack([dst, src]), weight, torch.Size([n,n]))
+    weight = torch.ones(src.shape)
+    adj = torch.sparse.FloatTensor(torch.stack([dst, src]), weight, torch.Size([n, n]))
     adj = adj.coalesce().to(device)
-    adj_T = torch.sparse.FloatTensor(torch.stack([src, dst]), weight, torch.Size([n,n]))
+    adj_T = torch.sparse.FloatTensor(torch.stack([src, dst]), weight, torch.Size([n, n]))
     adj_T = adj_T.coalesce().to(device)
     return adj, adj_T
 
 def main(args):
-    # load and preprocess dataset
-    data = RedditDataset(self_loop=True)
+    data = load_data(args)
     features = torch.FloatTensor(data.features)
     labels = torch.LongTensor(data.labels)
     if hasattr(torch, 'BoolTensor'):
@@ -132,6 +125,10 @@ def main(args):
               val_mask.int().sum().item(),
               test_mask.int().sum().item()))
 
+    g = data.graph
+    norm_out = g.out_degrees().float().clamp(min=1).pow(-0.5).view(-1, 1)
+    norm_in = g.in_degrees().float().clamp(min=1).pow(-0.5).view(-1, 1)
+
     if args.gpu < 0:
         device = "cpu"
     else:
@@ -141,9 +138,11 @@ def main(args):
         train_mask = train_mask.to(device)
         val_mask = val_mask.to(device)
         test_mask = test_mask.to(device)
+        norm_out = norm_out.to(device)
+        norm_in = norm_in.to(device)
 
-    # graph preprocess and calculate normalization factor
-    adjs = build_sparse_matrix(data.graph, device)
+    norm = norm_out, norm_in
+    adjs = build_sparse_matrix(g, device)
 
     # create GCN model
     model = GCN(in_feats,
@@ -151,7 +150,8 @@ def main(args):
                 n_classes,
                 args.n_layers,
                 F.relu,
-                args.dropout)
+                args.dropout,
+                norm=norm)
     model.to(device)
 
     loss_fcn = torch.nn.CrossEntropyLoss()
@@ -188,21 +188,15 @@ def main(args):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='GCN on Reddit dataset')
-    parser.add_argument("--dropout", type=float, default=0.5,
-            help="dropout probability")
-    parser.add_argument("--gpu", type=int, default=0,
-            help="gpu")
-    parser.add_argument("--lr", type=float, default=1e-2,
-            help="learning rate")
-    parser.add_argument("--n-epochs", type=int, default=200,
-            help="number of training epochs")
-    parser.add_argument("--n-hidden", type=int, default=16,
-            help="number of hidden gcn units")
-    parser.add_argument("--n-layers", type=int, default=2,
-            help="number of hidden gcn layers")
-    parser.add_argument("--weight-decay", type=float, default=5e-4,
-            help="Weight for L2 loss")
+    parser = argparse.ArgumentParser(description='GCN')
+    parser.add_argument("--dataset", type=str, default="reddit-self-loop")
+    parser.add_argument("--dropout", type=float, default=0.5)
+    parser.add_argument("--gpu", type=int, default=0)
+    parser.add_argument("--lr", type=float, default=1e-2)
+    parser.add_argument("--n-epochs", type=int, default=200)
+    parser.add_argument("--n-hidden", type=int, default=128)
+    parser.add_argument("--n-layers", type=int, default=2)
+    parser.add_argument("--weight-decay", type=float, default=5e-4)
     args = parser.parse_args()
     print(args)
 
