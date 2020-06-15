@@ -5,6 +5,8 @@ CPU and GPU with Graph Neural Network (GNN) workload.
 
 CPU Sparse Performance Benchmark
 ---------------------
+Benchmark [DGL Minigun](https://github.com/dglai/minigun) sparse kernels and
+MKL sparse kernels on AMD CPU and Intel CPU.
 
 ### Install system packages
 Many packages need to be installed to build the tests and generate input for
@@ -118,15 +120,26 @@ For MKL SPMM kernel, the execution time in milliseconds:
 
 GPU Sparse Performance Benchmark
 -------------------------
-Benchmark performance of Sparse Matrix Multiplication on AMD and NVIDIA GPU.
-For AMD, we used Vega 20 [Radeon VII] (single precision 13.44 TFLOPS, 16GB HBM2
-memory, Bandwidth 1,024 GB/s, Memory Bus 4096 bit), and for NVIDIA, we used
-GeForce RTX 2080 (single precision 10.07 TFLOPS, 8GB GDDR6 memory, Bandwidth
-448.0 GB/s, Memory Bus 256 bit)
+Scripts in [tests-gpu](./tests-gpu) benchmarks performance of Sparse Matrix
+Multiplication on AMD and NVIDIA GPU. The machines we used for benchmark are: 
+
+- AMD:
+	- CPU: AMD EPYC 7452 32-Core Processor (128 virtual cores), 1.5GHz (max
+	  2.35GHz), 1TB memory
+	- GPU: Vega 20 [Radeon VII]: single precision 13.44 TFLOPS, 16GB
+	  HBM2 memory, Bandwidth 1,024 GB/s, Memory Bus 4096 bit
+- Intel / NVIDIA:
+	- CPU: Intel(R) Core(TM) i7-9700 CPU (8 physical cores, 8 virtual
+	  cores), 3.0GHz (max 4.6GHz), 32GB memroy
+	- GPU: NVIDIA GeForce RTX 2080: single precision 10.07 TFLOPS, 8GB
+	  GDDR6 memory,
+  Bandwidth 448.0 GB/s, Memory Bus 256 bit
 
 ### Sparse Matrix Multiplication (SpMM) kernel
 
-Average execution time (in milliseconds) of 100 runs (after warming up with 100 runs)
+[tests-gpu/bench\_spmm.py](./tests-gpu/bench_spmm.py) benchmarks average
+execution time (in milliseconds) of 100 runs (after warming up with another 100
+runs). Below is the result using Reddit dataset as sparse graph:
 
 | Feature Size | AMD    | Intel   |
 |--------------|--------|---------|
@@ -136,12 +149,17 @@ Average execution time (in milliseconds) of 100 runs (after warming up with 100 
 | 128          | 93.180 | 156.993 |
 
 ### End to end training time of Graph Convolution Network
-Epoch time of training 2-layer GCN on Reddit Dataset, with input feature size
-602 and output feature size 41.
+[tests-gpu/gcn.py](./tests-gpu/gcn.py) benchmarks average epoch time (in
+seconds) of training 2-layer GCN on Reddit Dataset with input feature size 602
+and output feature size 41 and different hidden layer size. The accuracy
+numbers show the mean and standard deviation of 10 runs.
 
-| Hidden Size | AMD    | Intel  |
-|-------------|--------|--------|
-| 128         | 0.1520 | 0.3079 |
+| Hidden Size | AMD epoch time | AMD accuracy        | NIVIDA epoch time | NVIDIA accuracy     |
+|-------------|----------------|---------------------|-------------------|---------------------|
+| 16          | 0.0692         | 78.99 &plusmn; 3.43 | 0.1811            | 78.46 &plusmn; 5.31 |
+| 32          | 0.0762         | 90.21 &plusmn; 1.52 | 0.1886            | 88.42 &plusmn; 3.47 |
+| 64          | 0.0982         | 92.62 &plusmn; 0.27 | 0.2270            | 92.51 &plusmn; 0.59 |
+| 128         | 0.1520         | 93.24 &plusmn; 0.09 | 0.3078            | 93.24 &plusmn; 0.12 |
 
 
 Additional Tests
