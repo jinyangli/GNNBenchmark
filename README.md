@@ -121,7 +121,8 @@ For MKL SPMM kernel, the execution time in milliseconds:
 GPU Sparse Performance Benchmark
 -------------------------
 Scripts in [tests-gpu](./tests-gpu) benchmarks performance of Sparse Matrix
-Multiplication on AMD and NVIDIA GPU. The machines we used for benchmark are: 
+Multiplication (SpMM) on AMD and NVIDIA GPU. The machines we used for benchmark
+are: 
 
 - AMD:
 	- CPU: AMD EPYC 7452 32-Core Processor (128 virtual cores), 1.5GHz (max
@@ -167,15 +168,15 @@ Additional Tests
 ### Dense matrix multiplication
 [scripts/bench\_dense\_mm.py](./scripts/bench_dense_mm.py) benchmarks the
 performance of multiplication between two dense matrix of size 1000 by 1000
-using pytorch. To run this test, on Intel CPU or NVIDIA GPU, one needs to
-install torch. On AMD machines, for CPU, use [this docker
+using PyTorch. To run this test, for Intel CPU or NVIDIA GPU, one needs to
+install PyTorch. On AMD machines, for CPU, use [this docker
 file](https://github.com/ROCmSoftwarePlatform/pytorch/blob/master/docker/pytorch/cpu-only/Dockerfile)
 from an AMD-maintained fork of PyTorch which uses BLIS as BLAS library, and for
 GPU, use [this recommended docker
 image](https://rocmdocs.amd.com/en/latest/Deep_learning/Deep-learning.html#recommended-install-using-published-pytorch-rocm-docker-image).
 
 We tested using the same machines mentioned in sparse kernel experiments above.
-And results are shown below:
+Average execution time (in milliseconds) of 10 runs is shown below. 
 
 |     | AMD   | Intel / NVIDIA | 
 |-----|-------|----------------|
@@ -185,5 +186,5 @@ And results are shown below:
 We suspect that the large variance of Intel CPU is due to automatic CPU clock
 rate adjustment.
 
-Alternatively, one should use C++ interface of MKL, BLIS, cuSPARSE, and
-rocSPARSE to compare their performance.
+Alternatively, one should use C++ interface of MKL, BLIS, cuBLAS, and
+rocBLAS to compare their performance.
